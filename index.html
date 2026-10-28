@@ -1,0 +1,1419 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#FBF8F3">
+<title>Rey — 9 Kasım</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ───────────────────────── Temel ───────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #FBF8F3;
+    --bg-2:      #F4EFE6;
+    --ink:       #2A1E1A;
+    --ink-soft:  #5A463E;
+    --muted:     #8A7A70;
+    --line:      #E5DDD2;
+    --accent:    #B8455C;
+    --accent-2:  #C84B5C;
+    --accent-3:  #8B2E40;
+    --earth:     #8B5A3C;
+    --cream:     #FAF0DD;
+    --shadow:    0 1px 2px rgba(42,30,26,.04), 0 6px 24px rgba(42,30,26,.06);
+    --shadow-lg: 0 2px 6px rgba(42,30,26,.05), 0 20px 60px rgba(42,30,26,.12);
+    --radius:    14px;
+    --radius-sm: 8px;
+    --ease:      cubic-bezier(.22,.61,.36,1);
+  }
+
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.65;
+    font-size: 16px;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  body.no-scroll { overflow: hidden; height: 100vh; }
+  img { max-width: 100%; display: block; }
+  a { color: inherit; text-decoration: none; }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; }
+
+  ::selection { background: var(--accent); color: #fff; }
+
+  /* ───────────────────────── İntro (Kalp) ───────────────────────── */
+  #intro {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: #000;
+    transition: opacity 1s var(--ease), visibility 1s var(--ease);
+  }
+  #intro.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+  #intro canvas { display: block; }
+  #intro-msg {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity .9s ease;
+    user-select: none;
+    padding: 24px;
+  }
+  #intro-msg.show {
+    opacity: 1;
+    animation: beat 1.6s ease-in-out infinite;
+  }
+  @keyframes beat { 0%,100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+  .intro-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 600;
+    font-style: italic;
+    font-size: clamp(40px, 9vmin, 84px);
+    background: linear-gradient(90deg, #ff80ab, #ff4081, #ff1744, #ff80ab);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 0 14px rgba(255,64,129,.55));
+    letter-spacing: 1px;
+    line-height: 1;
+  }
+  .intro-wish {
+    margin-top: 12px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    font-size: clamp(14px, 2.6vmin, 20px);
+    color: #ffd6e2;
+    text-shadow: 0 0 10px rgba(255,128,171,.5);
+    letter-spacing: .5px;
+  }
+  #enter-btn {
+    margin-top: 36px;
+    padding: 14px 32px;
+    border: 1px solid rgba(255,214,226,.55);
+    border-radius: 999px;
+    background: rgba(255,255,255,.04);
+    color: #ffe4ec;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    pointer-events: auto;
+    cursor: pointer;
+    transition: all .4s var(--ease);
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  #intro-msg.show #enter-btn {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 1.2s;
+  }
+  #enter-btn:hover {
+    background: rgba(255,128,171,.18);
+    border-color: rgba(255,128,171,.9);
+    transform: translateY(-2px);
+  }
+
+  /* ───────────────────────── Müzik Çalar ───────────────────────── */
+  #player {
+    position: fixed;
+    right: 18px;
+    bottom: 18px;
+    z-index: 900;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px 10px 10px;
+    background: rgba(251,248,243,.92);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    box-shadow: var(--shadow-lg);
+    max-width: calc(100vw - 36px);
+    transition: all .4s var(--ease);
+  }
+  #player.minimized { padding: 10px; }
+  #player.minimized .player-info,
+  #player.minimized .progress-wrap,
+  #player.minimized #player-download { display: none; }
+
+  .player-play {
+    flex: 0 0 auto;
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all .3s var(--ease);
+    box-shadow: 0 4px 12px rgba(184,69,92,.35);
+  }
+  .player-play:hover { background: var(--accent-3); transform: scale(1.05); }
+  .player-play svg { width: 16px; height: 16px; }
+
+  .player-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .player-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 160px;
+  }
+  .player-time {
+    font-size: 10px;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    margin-top: 2px;
+  }
+  .progress-wrap {
+    width: 90px;
+    height: 3px;
+    background: var(--line);
+    border-radius: 2px;
+    cursor: pointer;
+    position: relative;
+  }
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width .1s linear;
+  }
+  #player-download {
+    flex: 0 0 auto;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all .3s var(--ease);
+  }
+  #player-download:hover { color: var(--accent); background: var(--bg-2); }
+  #player-download svg { width: 14px; height: 14px; }
+
+  @media (max-width: 540px) {
+    .progress-wrap { width: 60px; }
+    .player-title { max-width: 90px; }
+  }
+
+  /* ───────────────────────── Layout ───────────────────────── */
+  .wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+  @media (max-width: 540px) { .wrap { padding: 0 18px; } }
+
+  section { padding: 96px 0; position: relative; }
+  @media (max-width: 720px) { section { padding: 64px 0; } }
+
+  .eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 14px;
+  }
+  h1, h2, h3 { font-family: 'Cormorant Garamond', serif; font-weight: 500; color: var(--ink); line-height: 1.1; letter-spacing: -.01em; }
+  h2 { font-size: clamp(34px, 6vw, 56px); margin-bottom: 14px; }
+  h3 { font-size: clamp(22px, 3.4vw, 28px); margin-bottom: 8px; }
+  .lead { font-size: clamp(15px, 2vw, 18px); color: var(--ink-soft); max-width: 56ch; }
+  p { color: var(--ink-soft); }
+
+  /* ───────────────────────── Hero ───────────────────────── */
+  #hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-top: 80px;
+    position: relative;
+    overflow: hidden;
+  }
+  #hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(900px 600px at 80% -10%, rgba(184,69,92,.07), transparent 60%),
+      radial-gradient(700px 500px at 0% 100%, rgba(139,90,60,.06), transparent 60%);
+    pointer-events: none;
+  }
+  .hero-inner { position: relative; z-index: 1; }
+  .hero-date {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .hero-date::before, .hero-date::after {
+    content: ""; width: 32px; height: 1px;
+    background: var(--accent); opacity: .5;
+  }
+  .hero-date::after { display: none; }
+  .hero-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: clamp(80px, 18vw, 220px);
+    line-height: .9;
+    color: var(--ink);
+    letter-spacing: -.03em;
+    margin: 0;
+  }
+  .hero-tag {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: clamp(18px, 3vw, 26px);
+    color: var(--ink-soft);
+    margin-top: 18px;
+    max-width: 28ch;
+  }
+  .hero-meta {
+    margin-top: 56px;
+    display: flex;
+    gap: 48px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+  }
+  .hero-meta-item .label {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .hero-meta-item .value {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    color: var(--ink);
+  }
+  .scroll-cue {
+    position: absolute;
+    bottom: 36px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    opacity: .8;
+  }
+  .scroll-cue::after {
+    content: "";
+    width: 1px; height: 32px;
+    background: linear-gradient(var(--muted), transparent);
+    animation: cue 2s var(--ease) infinite;
+  }
+  @keyframes cue { 0%,100% { opacity: .3; transform: scaleY(.7); } 50% { opacity: 1; transform: scaleY(1); } }
+  @media (max-width: 720px) { .scroll-cue { display: none; } }
+
+  /* ───────────────────────── Bölüm başlığı ───────────────────────── */
+  .section-head {
+    margin-bottom: 56px;
+    max-width: 700px;
+  }
+  .section-head .eyebrow { display: inline-block; }
+  .section-head .lead { margin-top: 12px; }
+
+  /* ───────────────────────── Çizimler galerisi ───────────────────────── */
+  .drawings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 18px;
+  }
+  .drawing-card {
+    position: relative;
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--bg-2);
+    cursor: pointer;
+    transition: transform .5s var(--ease), box-shadow .5s var(--ease);
+    aspect-ratio: 9 / 16;
+    box-shadow: var(--shadow);
+  }
+  .drawing-card img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform .8s var(--ease);
+  }
+  .drawing-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+  .drawing-card:hover img { transform: scale(1.05); }
+  .drawing-card .num {
+    position: absolute;
+    top: 10px; left: 12px;
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 13px;
+    color: #fff;
+    background: rgba(0,0,0,.32);
+    backdrop-filter: blur(4px);
+    padding: 2px 10px;
+    border-radius: 999px;
+  }
+
+  /* Lightbox */
+  #lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 950;
+    background: rgba(20,12,10,.94);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .4s var(--ease), visibility .4s var(--ease);
+  }
+  #lightbox.open { opacity: 1; visibility: visible; }
+  #lightbox img {
+    max-width: 90vw;
+    max-height: 85vh;
+    border-radius: 8px;
+    box-shadow: 0 30px 80px rgba(0,0,0,.6);
+    transform: scale(.96);
+    transition: transform .5s var(--ease);
+  }
+  #lightbox.open img { transform: scale(1); }
+  #lightbox-close {
+    position: absolute;
+    top: 22px; right: 24px;
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.08);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    transition: all .3s var(--ease);
+  }
+  #lightbox-close:hover { background: rgba(255,255,255,.18); transform: rotate(90deg); }
+  #lightbox-nav {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+  }
+  .lb-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.25);
+    transition: all .3s var(--ease);
+  }
+  .lb-dot.active { background: #fff; width: 24px; border-radius: 4px; }
+
+  /* ───────────────────────── 3D Bölümü ───────────────────────── */
+  .model-hero {
+    position: relative;
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--bg-2);
+    box-shadow: var(--shadow-lg);
+    margin-bottom: 32px;
+  }
+  .model-hero img { width: 100%; }
+  .model-hero-caption {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 28px 32px;
+    background: linear-gradient(transparent, rgba(20,12,10,.78));
+    color: #fff;
+  }
+  .model-hero-caption h3 { color: #fff; font-size: 26px; margin-bottom: 4px; }
+  .model-hero-caption p { color: rgba(255,255,255,.78); font-size: 14px; }
+
+  /* Story carousel */
+  .carousel {
+    position: relative;
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--bg-2);
+    box-shadow: var(--shadow);
+    margin-bottom: 32px;
+  }
+  .carousel-track {
+    display: flex;
+    transition: transform .6s var(--ease);
+    scroll-snap-type: x mandatory;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .carousel-track::-webkit-scrollbar { display: none; }
+  .carousel-slide {
+    flex: 0 0 100%;
+    scroll-snap-align: center;
+    position: relative;
+  }
+  .carousel-slide img { width: 100%; display: block; }
+  .carousel-dots {
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 7px;
+    z-index: 2;
+  }
+  .carousel-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.5);
+    border: none;
+    transition: all .3s var(--ease);
+    cursor: pointer;
+  }
+  .carousel-dot.active { background: #fff; width: 22px; border-radius: 4px; }
+  .carousel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.85);
+    color: var(--ink);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 2;
+    transition: all .3s var(--ease);
+    box-shadow: 0 4px 12px rgba(0,0,0,.15);
+  }
+  .carousel-btn:hover { background: #fff; }
+  .carousel-btn.prev { left: 14px; }
+  .carousel-btn.next { right: 14px; }
+  @media (max-width: 540px) {
+    .carousel-btn { width: 36px; height: 36px; }
+  }
+
+  .render-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  @media (max-width: 540px) { .render-grid { grid-template-columns: 1fr; } }
+  .render-card {
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--bg-2);
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    transition: transform .4s var(--ease);
+  }
+  .render-card:hover { transform: translateY(-3px); }
+  .render-card img { width: 100%; }
+  .render-card .caption {
+    padding: 14px 16px;
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+  .render-card .caption strong { color: var(--ink); display: block; margin-bottom: 2px; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 16px; }
+
+  .first-attempt {
+    border: 1px dashed var(--line);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 32px;
+    background: linear-gradient(180deg, var(--bg-2), var(--bg));
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 24px;
+    align-items: center;
+  }
+  @media (max-width: 540px) {
+    .first-attempt { grid-template-columns: 1fr; }
+    .first-attempt img { max-width: 280px; margin: 0 auto; }
+  }
+  .first-attempt img {
+    width: 100%;
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow);
+  }
+  .first-attempt h3 { font-size: 22px; margin-bottom: 6px; }
+  .first-attempt p { font-size: 14px; }
+
+  /* Download cards */
+  .download-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+  }
+  .dl-card {
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 24px;
+    background: var(--bg);
+    transition: all .4s var(--ease);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .dl-card:hover { border-color: var(--accent); transform: translateY(-3px); box-shadow: var(--shadow); }
+  .dl-card .tag {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .dl-card h4 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-top: 2px;
+  }
+  .dl-card .desc {
+    font-size: 13px;
+    color: var(--ink-soft);
+    flex: 1;
+  }
+  .dl-card .format {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'Inter', sans-serif;
+    background: var(--bg-2);
+    padding: 3px 9px;
+    border-radius: 4px;
+    display: inline-block;
+    width: fit-content;
+    margin: 6px 0;
+  }
+  .dl-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 18px;
+    background: var(--ink);
+    color: #fff;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all .3s var(--ease);
+    margin-top: 6px;
+  }
+  .dl-btn:hover { background: var(--accent); }
+  .dl-btn svg { width: 14px; height: 14px; }
+  .dl-preview {
+    font-size: 12px;
+    color: var(--muted);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    margin-top: 8px;
+    display: inline-block;
+  }
+  .dl-preview:hover { color: var(--accent); }
+
+  /* ───────────────────────── Kitaplık ───────────────────────── */
+  .books-featured {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    margin-bottom: 64px;
+  }
+  .book-card {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 22px;
+    padding: 24px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--bg);
+    transition: all .4s var(--ease);
+  }
+  .book-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-4px); border-color: var(--accent); }
+  @media (max-width: 540px) {
+    .book-card { grid-template-columns: 110px 1fr; gap: 16px; padding: 18px; }
+  }
+  .book-cover {
+    width: 100%;
+    aspect-ratio: 2/3;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0,0,0,.18), 0 2px 4px rgba(0,0,0,.1);
+    background: var(--bg-2);
+    transition: transform .5s var(--ease);
+  }
+  .book-card:hover .book-cover { transform: rotate(-1.5deg) translateY(-2px); }
+  .book-cover img { width: 100%; height: 100%; object-fit: cover; }
+  .book-meta .eyebrow { font-size: 10px; margin-bottom: 6px; }
+  .book-meta h3 { font-size: 22px; margin-bottom: 4px; font-style: italic; }
+  .book-meta .author { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+  .book-meta .note { font-size: 13px; color: var(--ink-soft); margin-bottom: 16px; }
+  .book-dl {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--accent);
+    padding: 8px 14px;
+    border: 1px solid var(--accent);
+    border-radius: 999px;
+    transition: all .3s var(--ease);
+  }
+  .book-dl:hover { background: var(--accent); color: #fff; }
+  .book-dl svg { width: 12px; height: 12px; }
+
+  .book-list-wrap {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    margin-bottom: 64px;
+  }
+  @media (max-width: 720px) { .book-list-wrap { grid-template-columns: 1fr; gap: 32px; } }
+  .book-list h4 {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--line);
+  }
+  .book-list ul { list-style: none; }
+  .book-list li {
+    padding: 14px 0;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+  .book-list li:last-child { border-bottom: none; }
+  .book-list .title {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 18px;
+    color: var(--ink);
+    flex: 1;
+  }
+  .book-list .author-name {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .quote-block {
+    text-align: center;
+    padding: 64px 24px;
+    background: linear-gradient(180deg, var(--bg-2), var(--bg));
+    border-radius: var(--radius);
+    margin-bottom: 64px;
+    position: relative;
+  }
+  .quote-block::before {
+    content: "„";
+    position: absolute;
+    top: 12px; left: 32px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 120px;
+    color: var(--accent);
+    opacity: .15;
+    line-height: 1;
+  }
+  .quote-block .text {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: clamp(24px, 4vw, 38px);
+    line-height: 1.3;
+    color: var(--ink);
+    max-width: 28ch;
+    margin: 0 auto 16px;
+  }
+  .quote-block .source {
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .phil-notes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+  }
+  .phil-note {
+    padding: 22px;
+    background: var(--bg);
+    border-left: 2px solid var(--accent);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  }
+  .phil-note .topic {
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .phil-note p { font-size: 14px; color: var(--ink-soft); }
+
+  /* ───────────────────────── Footer ───────────────────────── */
+  footer {
+    padding: 80px 0 140px;
+    text-align: center;
+    border-top: 1px solid var(--line);
+    margin-top: 40px;
+    background: var(--bg-2);
+  }
+  footer .heart {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: clamp(28px, 5vw, 44px);
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+  footer .message {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: clamp(16px, 2.4vw, 20px);
+    color: var(--ink-soft);
+    max-width: 40ch;
+    margin: 0 auto 24px;
+  }
+  footer .signature {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* Reveal animasyonu */
+  .reveal { opacity: 0; transform: translateY(28px); transition: opacity .9s var(--ease), transform .9s var(--ease); }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+    .reveal { opacity: 1; transform: none; }
+  }
+</style>
+</head>
+<body class="no-scroll">
+
+<!-- ───────────────────────── İNTRO ───────────────────────── -->
+<div id="intro">
+  <canvas id="intro-canvas"></canvas>
+  <div id="intro-msg">
+    <div class="intro-name">Rey</div>
+    <div class="intro-wish">doğum günün kutlu olsun</div>
+    <button id="enter-btn" type="button">Siteye Gir</button>
+  </div>
+</div>
+
+<!-- ───────────────────────── MÜZİK ÇALAR ───────────────────────── -->
+<div id="player">
+  <button class="player-play" id="player-play" aria-label="Çal/Durdur">
+    <svg id="play-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+    <svg id="pause-icon" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+  </button>
+  <div class="player-info">
+    <div class="player-title">Rey İçin</div>
+    <div class="player-time"><span id="time-cur">0:00</span> / <span id="time-dur">0:00</span></div>
+  </div>
+  <div class="progress-wrap" id="progress">
+    <div class="progress-fill" id="progress-fill"></div>
+  </div>
+  <a id="player-download" href="Rey İçin.mp3" download aria-label="Şarkıyı indir">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+  </a>
+</div>
+
+<!-- ───────────────────────── HERO ───────────────────────── -->
+<section id="hero">
+  <div class="wrap hero-inner">
+    <div class="hero-date">9 Kasım</div>
+    <h1 class="hero-name">Rey.</h1>
+    <p class="hero-tag">Uzaktan da olsa, doğum gününde — ya da her gün — sana küçük bir şey. Aşağı kaydır, sana ait her şey burada.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">
+        <div class="label">Bu site</div>
+        <div class="value">Senin için</div>
+      </div>
+      <div class="hero-meta-item">
+        <div class="label">Materyaller</div>
+        <div class="value">Çizimler · 3D · Kitaplar · Müzik</div>
+      </div>
+      <div class="hero-meta-item">
+        <div class="label">Tarih</div>
+        <div class="value">9 Kasım</div>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-cue">Aşağı kaydır</div>
+</section>
+
+<!-- ───────────────────────── ÇİZİMLER ───────────────────────── -->
+<section id="drawings">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow">Rey'in Eli</div>
+      <h2>Çizimler</h2>
+      <p class="lead">Rey'in kendi elleriyle çizdiği çalışmalardan bir seçki. Üzerine tıkla, daha yakından bak.</p>
+    </div>
+    <div class="drawings-grid reveal" id="drawings-grid"></div>
+  </div>
+</section>
+
+<!-- ───────────────────────── 3D MODELLEME ───────────────────────── -->
+<section id="models">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow">Bir Sahneye Adanmış</div>
+      <h2>Gilmore Girls — 3D Modelleme</h2>
+      <p class="lead">Rey'in en sevdiği filmden bir sahnenin 3D modellemesi. Aşağıda modelin fotoğrafları, render süreçleri ve indirme bağlantıları var.</p>
+    </div>
+
+    <div class="model-hero reveal">
+      <img src="https://raw.githubusercontent.com/arkadashed/Rey.-izim/refs/heads/main/5ba5b6d480ed51d718c2014fda7eaed43f85c206d659bd6432fa4cb2ec2e1bbf.png" alt="Gilmore Girls sahnesi 3D modelleme — ana görsel">
+      <div class="model-hero-caption">
+        <h3>Ana Modelleme</h3>
+        <p>Gilmore Girls sahnesi — en kaliteli versiyon</p>
+      </div>
+    </div>
+
+    <div class="section-head reveal" style="margin-top:64px;margin-bottom:24px;">
+      <div class="eyebrow">Tam Versiyon — 3 Açı</div>
+      <h3 style="font-size:24px;margin-bottom:8px;">Story gibi kaydır</h3>
+      <p class="lead" style="font-size:14px;">Tam versiyon modelinin üç farklı açıdan fotoğrafları.</p>
+    </div>
+
+    <div class="carousel reveal" id="carousel-1">
+      <div class="carousel-track" id="carousel-1-track">
+        <div class="carousel-slide"><img src="https://raw.githubusercontent.com/arkadashed/Rey.-izim/refs/heads/main/tam%20kar%C5%9F%C4%B1s%C4%B1nda%20foto%C4%9Fraf.jpg" alt="Tam karşısından"></div>
+        <div class="carousel-slide"><img src="https://raw.githubusercontent.com/arkadashed/Rey.-izim/refs/heads/main/tam%20versiyon%20yandan%20foto%C4%9Fraf%C4%B1.jpg" alt="Yandan — birinci"></div>
+        <div class="carousel-slide"><img src="https://raw.githubusercontent.com/arkadashed/Rey.-izim/refs/heads/main/diyer%20taraftan%20yandan%20foto%C4%9Fraf%C4%B1.jpg" alt="Yandan — diğer taraf"></div>
+      </div>
+      <button class="carousel-btn prev" data-carousel="1" data-dir="-1" aria-label="Önceki">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <button class="carousel-btn next" data-carousel="1" data-dir="1" aria-label="Sonraki">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+      <div class="carousel-dots" id="carousel-1-dots"></div>
+    </div>
+
+    <div class="section-head reveal" style="margin-top:48px;margin-bottom:24px;">
+      <div class="eyebrow">Render Sırasında</div>
+      <h3 style="font-size:24px;margin-bottom:8px;">Sahnenin işlenişi</h3>
+      <p class="lead" style="font-size:14px;">Render sırasında çekilmiş kareler.</p>
+    </div>
+
+    <div class="render-grid reveal">
+      <div class="render-card" data-img="https://raw.githubusercontent.com/arkadashed/Rey.-izim/refs/heads/main/rey3d.jpg">
+        <img src="https://raw.githubusercontent.com/arkadashed/Rey.-izim/refs/heads/main/rey3d.jpg" alt="Render sırasında — genel">
+        <div class="caption"><strong>Render karesi</strong>Modelleme sırasında yakalanan genel açı.</div>
+      </div>
+      <div class="render-card" data-img="https://raw.githubusercontent.com/arkadashed/Rey.-izim/refs/heads/main/reyy.jpg">
+        <img src="https://raw.githubusercontent.com/arkadashed/Rey.-izim/refs/heads/main/reyy.jpg" alt="Render sırasında — yakın">
+        <div class="caption"><strong>Yakın açı</strong>Sahnenin detaylarına daha yakın bir bakış.</div>
+      </div>
+    </div>
+
+    <div class="first-attempt reveal">
+      <img src="https://raw.githubusercontent.com/arkadashed/Rey.-izim/refs/heads/main/orta%20d%C3%BCzey%20foto%C4%9Fraf.jpg" alt="İlk deneme 3D modelleme">
+      <div>
+        <h3>İlk deneme</h3>
+        <p>Her şeyin bir başlangıcı vardır. Bu, sahnenin ilk modelleme denemesiydi — henüz olgunlaşmamış hali. Sonraki çalışma bunun üzerine kuruldu.</p>
+      </div>
+    </div>
+
+    <div class="section-head reveal" style="margin-top:64px;margin-bottom:24px;">
+      <div class="eyebrow">İndir</div>
+      <h3 style="font-size:24px;margin-bottom:8px;">3D Modelleri indir</h3>
+      <p class="lead" style="font-size:14px;">Üç farklı versiyon — kaliteli, ilk deneme ve tam versiyon.</p>
+    </div>
+
+    <div class="download-grid reveal">
+      <div class="dl-card">
+        <div class="tag">Ana model</div>
+        <h4>Kaliteli Versiyon</h4>
+        <p class="desc">Web üzerinde görüntülenebilen, en olgun modelleme.</p>
+        <span class="format">.glb · web uyumlu</span>
+        <a class="dl-btn" href="https://www.mediafire.com/file/6xen720f6tt5hjf/Rey+do%C4%9Fum+g%C3%BCn%C3%BC+tek.glb/file" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          Mediafire'dan indir
+        </a>
+        <a class="dl-preview" href="https://www.ilove3dm.com/tr/view/01a181fa-7df6-7198-8607-d052c3ecf2db" target="_blank" rel="noopener">Tarayıcıda önizle →</a>
+      </div>
+      <div class="dl-card">
+        <div class="tag">İlk deneme</div>
+        <h4>Orta Düzey</h4>
+        <p class="desc">Hatalarıyla birlikte, gelişim sürecini gösteren modelleme.</p>
+        <span class="format">.glb · web uyumlu</span>
+        <a class="dl-btn" href="https://www.mediafire.com/file/elue9vzwcr8s6pe/orta+d%C3%BCzey+3d+model+hatal%C4%B1+bir+az.glb/file" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          Mediafire'dan indir
+        </a>
+        <a class="dl-preview" href="https://www.ilove3dm.com/tr/view/01a181de-8122-72ae-98c8-8a07cb63adbb" target="_blank" rel="noopener">Tarayıcıda önizle →</a>
+      </div>
+      <div class="dl-card">
+        <div class="tag">Tam versiyon</div>
+        <h4>Prisma — Tam</h4>
+        <p class="desc">Filmin sahnesinin tam modellemesi. Web'de açılmaz, indirmen gerek.</p>
+        <span class="format">.prisma · yalnızca indir</span>
+        <a class="dl-btn" href="https://www.mediafire.com/file/lasd0rhvksudkrt/rey+tam+version.prisma/file" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          Mediafire'dan indir
+        </a>
+        <span style="font-size:11px;color:var(--muted);margin-top:8px;">Bu model web üzerinde görüntülenemiyor — indirdikten sonra ilgili yazılımla aç.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────────────────── KİTAPLIK ───────────────────────── -->
+<section id="library">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow">Kitaplar & Felsefe</div>
+      <h2>Kütüphane</h2>
+      <p class="lead">Rey'in sevdiği, önerdiği ve ona önerilen kitaplar. Fiziksel kitaba olan düşkünlüğünü de unutmamak lazım — sayfa kokusu, cilt dokusu.</p>
+    </div>
+
+    <div class="books-featured reveal">
+      <div class="book-card">
+        <div class="book-cover">
+          <img src="https://mir.az/uploads/posts/2024-08/thumbs/d3fa423d82_ekran-goruntusu-2024-08-04-190420.webp" alt="Ölü Ozanlar Derneği kapak">
+        </div>
+        <div class="book-meta">
+          <div class="eyebrow">En sevdiği kitaplardan</div>
+          <h3>Ölü Ozanlar Derneği</h3>
+          <div class="author">Nancy H. Kleinbaum</div>
+          <p class="note">"Carpe diem" — anı yaşa. Rey'in en sevdiği kitaplardan biri.</p>
+          <a class="book-dl" href="https://mir.az/kitab/40190-nancy-h-kleinbaum-olu-ozanlar-cemiyyeti-pdf.html" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            PDF indir
+          </a>
+        </div>
+      </div>
+
+      <div class="book-card">
+        <div class="book-cover">
+          <img src="https://mir.az/uploads/posts/2022-08/thumbs/1659872072_sessiz-hasta-10219785-52-b.webp" alt="Sessiz Hasta kapak">
+        </div>
+        <div class="book-meta">
+          <div class="eyebrow">Önerdiği kitaplardan</div>
+          <h3>Sessiz Hasta</h3>
+          <div class="author">Alex Michaelides</div>
+          <p class="note">"En büyük plot twist bu" diyor Rey.</p>
+          <a class="book-dl" href="https://mir.az/kitab/2080-alex-michaelides-sessiz-xeste-pdf.html" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            PDF indir
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="book-list-wrap reveal">
+      <div class="book-list">
+        <h4>Sevdiği / Önerdiği</h4>
+        <ul>
+          <li><span class="title">Ölü Ozanlar Derneği</span><span class="author-name">Kleinbaum</span></li>
+          <li><span class="title">Badem</span><span class="author-name">—</span></li>
+          <li><span class="title">Sessiz Hasta</span><span class="author-name">Michaelides</span></li>
+          <li><span class="title">Yabancı</span><span class="author-name">Albert Camus</span></li>
+        </ul>
+      </div>
+      <div class="book-list">
+        <h4>Ona önerilen</h4>
+        <ul>
+          <li><span class="title">Gece Yarısı Kütüphanesi</span><span class="author-name">Matt Haig</span></li>
+          <li><span class="title">Olasılıklar Kitabı</span><span class="author-name">Chris Bohjalian</span></li>
+          <li><span class="title">Tersine Dünya</span><span class="author-name">Orhan Kemal</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="quote-block reveal">
+      <p class="text">"Böyle buyurdu Zerdüşt."</p>
+      <div class="source">Friedrich Nietzsche · Favori alıntı</div>
+    </div>
+
+    <div class="phil-notes reveal">
+      <div class="phil-note">
+        <div class="topic">Zerdüştlük & Avesta</div>
+        <p>Zerdüştlük, Avesta ve dinler tarihine derin bir merakı var. Bu ilgi "Böyle Buyurdu Zerdüşt" favori alıntısında da kendini gösteriyor.</p>
+      </div>
+      <div class="phil-note">
+        <div class="topic">Rousseau</div>
+        <p>Jean-Jacques Rousseau'yu sevmiyor — kadınları aşağılayan tutumu yüzünden. Bu, onun eleştirel felsefi duruşunun tipik bir örneği.</p>
+      </div>
+      <div class="phil-note">
+        <div class="topic">Nietzsche</div>
+        <p>Nietzsche'i "overhyped" — abartılmış — buluyor. Yine de en sevdiği alıntı onun kalemi. Çelişkili olduğu yerlerde en ilginç oluyor.</p>
+      </div>
+      <div class="phil-note">
+        <div class="topic">Patriyarka</div>
+        <p>Patriyarkanın romantize edilmesine karşı eleştirel bir duruşu var. Kadınların zihin yapısının daha kompleks olduğunu savunuyor.</p>
+      </div>
+      <div class="phil-note">
+        <div class="topic">Fiziksel Kitap</div>
+        <p>E-kitap ve PDF okumayı sevmiyor. Fiziksel kitabın kokusu, hissi, ağırlığı onun için okumanın bir parçası.</p>
+      </div>
+      <div class="phil-note">
+        <div class="topic">Plot Twist</div>
+        <p>Sessiz Hasta'daki plot twist'i "en büyük" olarak nitelendiriyor. Hikaye anlatımındaki sürpriz unsurlara düşkün.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────────────────── FOOTER ───────────────────────── -->
+<footer>
+  <div class="wrap">
+    <div class="heart reveal">❦</div>
+    <p class="message reveal">İyi ki doğdun, iyi ki varsın. 9 Kasım ve sonrası — her gün senin günün olsun.</p>
+    <div class="signature reveal">Rey · 9 Kasım</div>
+  </div>
+</footer>
+
+<!-- Lightbox -->
+<div id="lightbox">
+  <button id="lightbox-close" aria-label="Kapat">×</button>
+  <img id="lightbox-img" src="" alt="">
+  <div id="lightbox-nav"></div>
+</div>
+
+<!-- Audio element -->
+<audio id="audio" preload="metadata" src="Rey İçin.mp3"></audio>
+
+<script>
+/* ════════════════════════════════════════════════════════════
+   1) İNTRO — Kalp çizen animasyon (orijinal HTML'in birebir çevirisi)
+   ════════════════════════════════════════════════════════════ */
+(function intro(){
+  const canvas = document.getElementById('intro-canvas');
+  const ctx    = canvas.getContext('2d');
+  const msg    = document.getElementById('intro-msg');
+  const enterBtn = document.getElementById('enter-btn');
+
+  let W, H, cx, cy, fs, K;
+  function layout(){
+    W = canvas.width  = innerWidth;
+    H = canvas.height = innerHeight;
+    cx = W / 2; cy = H / 2;
+    fs = Math.max(7, Math.min(13, Math.round(Math.min(W, H) / 70)));
+    K  = fs / 16;
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, W, H);
+  }
+  layout();
+  addEventListener('resize', () => { layout(); reset(); });
+
+  function heartPoint(i, scale){
+    const a  = i * (Math.PI * 2) / 120;
+    const wx = 16 * Math.pow(Math.sin(a), 3);
+    const wy = 13 * Math.cos(a) - 5 * Math.cos(2*a) - 2 * Math.cos(3*a) - 1 * Math.cos(4*a);
+    return { x: cx + wx * scale * K, y: cy - wy * scale * K };
+  }
+
+  const seq = [];
+  for (let scale = 11; scale <= 16; scale++)
+    for (let i = 0; i < 120; i++)
+      seq.push({ scale, i });
+
+  let p = 0, state = 'draw', timer = 0;
+  function reset(){ p = 0; state = 'draw'; timer = 0; msg.classList.remove('show'); }
+
+  function colorFor(i, scale){
+    const hue   = 325 + (i / 120) * 45;
+    const light = 62 + (scale - 11) * 2.2;
+    return `hsl(${hue}, 90%, ${light}%)`;
+  }
+  const STEPS_PER_FRAME = 3;
+
+  function frame(){
+    if (document.getElementById('intro').classList.contains('hidden')) return;
+    if (state === 'draw'){
+      ctx.font = `bold ${fs}px Arial`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      for (let k = 0; k < STEPS_PER_FRAME; k++){
+        if (p >= seq.length){
+          state = 'hold'; timer = 0;
+          msg.classList.add('show');
+          break;
+        }
+        const { scale, i } = seq[p++];
+        const pt = heartPoint(i, scale);
+        ctx.fillStyle = colorFor(i, scale);
+        ctx.fillText('I love you', pt.x, pt.y);
+      }
+    } else if (state === 'hold'){
+      if (++timer > 110){ state = 'fade'; timer = 0; msg.classList.remove('show'); }
+    } else if (state === 'fade'){
+      ctx.fillStyle = 'rgba(0,0,0,0.045)';
+      ctx.fillRect(0, 0, W, H);
+      if (++timer > 70){
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, W, H);
+        reset();
+      }
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  /* Siteye gir butonu */
+  function enterSite(){
+    document.getElementById('intro').classList.add('hidden');
+    document.body.classList.remove('no-scroll');
+    window.scrollTo(0, 0);
+    /* Müziği otomatik başlatmayı dene (mobile genelde engeller, kullanıcı tıklamış olur) */
+    try { audioEl.play().catch(()=>{}); } catch(e){}
+  }
+  enterBtn.addEventListener('click', enterSite);
+
+  /* Yedek: animasyon 8 saniye içinde görünür olmazsa intro'yu gizle
+     (örneğin düşük güçlü cihazlarda takılırsa diye). */
+  setTimeout(() => {
+    if (!msg.classList.contains('show')){
+      msg.classList.add('show');
+    }
+  }, 8000);
+
+  /* 15 saniye sonra hala intro'daysa kullanıcıyı serbest bırak */
+  setTimeout(() => {
+    if (!document.getElementById('intro').classList.contains('hidden')){
+      msg.classList.add('show');
+    }
+  }, 15000);
+
+  /* İntro bittikten sonra enter butonu görünür, kullanıcı tıklar */
+})();
+
+/* ════════════════════════════════════════════════════════════
+   2) MÜZİK ÇALAR
+   ════════════════════════════════════════════════════════════ */
+const audioEl    = document.getElementById('audio');
+const playBtn    = document.getElementById('player-play');
+const playIcon   = document.getElementById('play-icon');
+const pauseIcon  = document.getElementById('pause-icon');
+const progressEl = document.getElementById('progress');
+const progressFill = document.getElementById('progress-fill');
+const timeCur    = document.getElementById('time-cur');
+const timeDur    = document.getElementById('time-dur');
+
+function fmt(t){
+  if (!isFinite(t)) return '0:00';
+  const m = Math.floor(t / 60);
+  const s = Math.floor(t % 60);
+  return m + ':' + (s < 10 ? '0' + s : s);
+}
+function togglePlay(){
+  if (audioEl.paused){ audioEl.play().catch(()=>{}); }
+  else { audioEl.pause(); }
+}
+playBtn.addEventListener('click', togglePlay);
+audioEl.addEventListener('play',  () => { playIcon.style.display = 'none';  pauseIcon.style.display = 'block'; });
+audioEl.addEventListener('pause', () => { playIcon.style.display = 'block'; pauseIcon.style.display = 'none'; });
+audioEl.addEventListener('loadedmetadata', () => { timeDur.textContent = fmt(audioEl.duration); });
+audioEl.addEventListener('timeupdate', () => {
+  const cur = audioEl.currentTime;
+  const dur = audioEl.duration || 0;
+  timeCur.textContent = fmt(cur);
+  if (dur) progressFill.style.width = (cur / dur * 100) + '%';
+});
+progressEl.addEventListener('click', (e) => {
+  const rect = progressEl.getBoundingClientRect();
+  const ratio = (e.clientX - rect.left) / rect.width;
+  if (audioEl.duration) audioEl.currentTime = ratio * audioEl.duration;
+});
+audioEl.addEventListener('ended', () => { audioEl.currentTime = 0; progressFill.style.width = '0%'; });
+
+/* ════════════════════════════════════════════════════════════
+   3) ÇİZİMLER GALERİSİ
+   ════════════════════════════════════════════════════════════ */
+const drawingImages = [
+  'https://raw.githubusercontent.com/arkadashed/Rey.-izim/refs/heads/main/Screenshot_20260814_225048_com_instagram_android_TransparentModalActivity_edit_73729237768957.jpg',
+  'https://raw.githubusercontent.com/arkadashed/Rey.-izim/refs/heads/main/Screenshot_20260814_225053_com_instagram_android_TransparentModalActivity_edit_73720823626616.jpg',
+  'https://raw.githubusercontent.com/arkadashed/Rey.-izim/refs/heads/main/Screenshot_20260814_225058_com_instagram_android_TransparentModalActivity_edit_73707601610111.jpg',
+  'https://raw.githubusercontent.com/arkadashed/Rey.-izim/refs/heads/main/Screenshot_20260814_225103_com_instagram_android_TransparentModalActivity_edit_73695005023345.jpg',
+  'https://raw.githubusercontent.com/arkadashed/Rey.-izim/refs/heads/main/Screenshot_20260823_143518_com_instagram_android_InstagramMainActivity_edit_7360278625888.jpg',
+  'https://raw.githubusercontent.com/arkadashed/Rey.-izim/refs/heads/main/Screenshot_20260828_011225_com_instagram_android_InstagramMainActivity_edit_408902535304275.jpg',
+  'https://raw.githubusercontent.com/arkadashed/Rey.-izim/refs/heads/main/Screenshot_20260906_101302_com_instagram_android_InstagramMainActivity.jpg'
+];
+const grid = document.getElementById('drawings-grid');
+drawingImages.forEach((src, i) => {
+  const card = document.createElement('div');
+  card.className = 'drawing-card';
+  card.dataset.img = src;
+  card.innerHTML = `<span class="num">${String(i+1).padStart(2,'0')}</span><img src="${src}" alt="Rey'in çizimi ${i+1}" loading="lazy">`;
+  grid.appendChild(card);
+});
+
+/* ════════════════════════════════════════════════════════════
+   4) LIGHTBOX (çizimler + render kartlar için)
+   ════════════════════════════════════════════════════════════ */
+const lightbox = document.getElementById('lightbox');
+const lbImg = document.getElementById('lightbox-img');
+const lbClose = document.getElementById('lightbox-close');
+const lbNav = document.getElementById('lightbox-nav');
+let lbGallery = [];
+let lbIndex = 0;
+
+function openLightbox(gallery, idx){
+  lbGallery = gallery;
+  lbIndex = idx;
+  lbImg.src = gallery[idx];
+  lightbox.classList.add('open');
+  document.body.classList.add('no-scroll');
+  renderLbNav();
+}
+function closeLightbox(){
+  lightbox.classList.remove('open');
+  document.body.classList.remove('no-scroll');
+}
+function lbShow(i){
+  lbIndex = (i + lbGallery.length) % lbGallery.length;
+  lbImg.src = lbGallery[lbIndex];
+  renderLbNav();
+}
+function renderLbNav(){
+  if (lbGallery.length <= 1){ lbNav.innerHTML = ''; return; }
+  lbNav.innerHTML = lbGallery.map((_, i) => `<button class="lb-dot ${i===lbIndex?'active':''}" data-i="${i}"></button>`).join('');
+  lbNav.querySelectorAll('.lb-dot').forEach(b => b.addEventListener('click', () => lbShow(parseInt(b.dataset.i))));
+}
+
+document.addEventListener('click', (e) => {
+  const card = e.target.closest('.drawing-card');
+  if (card){
+    const all = Array.from(document.querySelectorAll('.drawing-card')).map(c => c.dataset.img);
+    const idx = all.indexOf(card.dataset.img);
+    openLightbox(all, idx);
+    return;
+  }
+  const rCard = e.target.closest('.render-card');
+  if (rCard){
+    /* Render kartları tek tek açılır */
+    openLightbox([rCard.dataset.img], 0);
+    return;
+  }
+});
+lbClose.addEventListener('click', closeLightbox);
+lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
+document.addEventListener('keydown', (e) => {
+  if (!lightbox.classList.contains('open')) return;
+  if (e.key === 'Escape') closeLightbox();
+  if (e.key === 'ArrowRight') lbShow(lbIndex + 1);
+  if (e.key === 'ArrowLeft')  lbShow(lbIndex - 1);
+});
+
+/* ════════════════════════════════════════════════════════════
+   5) CAROUSEL (story-like kaydırma)
+   ════════════════════════════════════════════════════════════ */
+function setupCarousel(id){
+  const track = document.getElementById(id + '-track');
+  const dotsContainer = document.getElementById(id + '-dots');
+  const slides = track.querySelectorAll('.carousel-slide');
+  let current = 0;
+
+  /* Dots */
+  slides.forEach((_, i) => {
+    const dot = document.createElement('button');
+    dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
+    dot.setAttribute('aria-label', 'Slayt ' + (i+1));
+    dot.addEventListener('click', () => goTo(i));
+    dotsContainer.appendChild(dot);
+  });
+
+  function goTo(i){
+    current = (i + slides.length) % slides.length;
+    track.scrollTo({ left: current * track.clientWidth, behavior: 'smooth' });
+    updateDots();
+  }
+  function updateDots(){
+    dotsContainer.querySelectorAll('.carousel-dot').forEach((d, i) => d.classList.toggle('active', i === current));
+  }
+
+  /* Butonlar */
+  document.querySelectorAll(`[data-carousel="${id.replace('carousel-','')}"]`).forEach(btn => {
+    btn.addEventListener('click', () => goTo(current + parseInt(btn.dataset.dir)));
+  });
+
+  /* Touch/swipe için scroll snap'i takip et */
+  let scrollTimer;
+  track.addEventListener('scroll', () => {
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(() => {
+      const slideWidth = track.clientWidth;
+      if (slideWidth > 0) {
+        current = Math.round(track.scrollLeft / slideWidth);
+        updateDots();
+      }
+    }, 80);
+  });
+}
+setupCarousel('carousel-1');
+
+/* ════════════════════════════════════════════════════════════
+   6) SCROLL REVEAL
+   ════════════════════════════════════════════════════════════ */
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting){
+      e.target.classList.add('visible');
+      io.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+/* ════════════════════════════════════════════════════════════
+   7) MOBIL Müzik çalar — küçük ekranlarda daralt
+   ════════════════════════════════════════════════════════════ */
+let lastScroll = 0;
+const player = document.getElementById('player');
+addEventListener('scroll', () => {
+  const y = window.scrollY;
+  /* Sadece küçük ekranlarda daralt */
+  if (window.innerWidth < 540 && y > 200 && y > lastScroll){
+    player.classList.add('minimized');
+  } else {
+    player.classList.remove('minimized');
+  }
+  lastScroll = y;
+}, { passive: true });
+</script>
+</body>
+</html>
